@@ -1,0 +1,4 @@
+[deps]
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Vaja01 = "83d9234b-f976-4031-9c0e-5b6bb4e5fee9"
