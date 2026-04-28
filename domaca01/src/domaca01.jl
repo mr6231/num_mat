@@ -4,7 +4,7 @@ using LinearAlgebra
 using Graphs
 
 
-export RedkaMatrika, getRedkaFromMatrix, sor, sparseMatrix
+export RedkaMatrika, toRedka, toDense, sor, sparseMatrix
 
 
 include("redka_matrika.jl")
