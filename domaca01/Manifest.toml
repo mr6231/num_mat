@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "382178e8718797d7a21a30919e279c89381521e0"
+project_hash = "e613d4e728dfd20c10bab314a555febcc0785b18"
 
 [[deps.ArnoldiMethod]]
 deps = ["LinearAlgebra", "Random", "StaticArrays"]
@@ -180,7 +180,7 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 version = "1.11.0"
 
 [[deps.domaca01]]
-deps = ["Graphs", "LinearAlgebra"]
+deps = ["Graphs", "LinearAlgebra", "Random"]
 path = "."
 uuid = "a24a7718-3290-43de-a33c-0e91a7ddcbf2"
 version = "0.1.0"

@@ -28,8 +28,8 @@ function Base.setindex!(A::RedkaMatrika, val::Float64, i::Int, j::Int)
 end
 
 function Base.:*(A::RedkaMatrika, x::Vector{Float64})
-    y = zeros(n)
-    for i in 1:n
+    y = zeros(A.n)
+    for i in 1:A.n
         for (val, j) in zip(A.V[i], A.I[i])
             y[i] = y[i] + val * x[j]
         end
