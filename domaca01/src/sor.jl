@@ -5,7 +5,7 @@ function sor(A::RedkaMatrika, b::Vector{Float64}, omega::Float64=1.0, tol=1e-10)
 
     for iteration in 1:max_iterations
         for row in 1:n
-            diagonal_entry, row_sum = row_terms(A, row, x)
+            diagonal_entry, row_sum = rowTerms(A, row, x)
 
             if diagonal_entry == 0.0
                 error("Diagonal element is zero in row $row")
@@ -24,7 +24,7 @@ function sor(A::RedkaMatrika, b::Vector{Float64}, omega::Float64=1.0, tol=1e-10)
     error("Convergence was not achieved within $max_iterations iterations")
 end
 
-function row_terms(A::RedkaMatrika, row::Int, x::Vector{Float64})
+function rowTerms(A::RedkaMatrika, row::Int, x::Vector{Float64})
     diagonal = 0.0
     off_sum = 0.0
 
