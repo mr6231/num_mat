@@ -1,3 +1,8 @@
+include("../src/domaca01.jl")
+
+using .domaca01
+using Graphs
+
 function laplacianMatrix(G::AbstractGraph, sprem)
     n = length(sprem)
     M = zeros(n, n)
@@ -40,6 +45,7 @@ end
 function vlozi!(G::AbstractGraph, fixed, points; ω = 1.0)
     free = setdiff(vertices(G), fixed)
     A = laplacianMatrix(G, free)
+    A = domaca01.toRedka(A)
 
     dims = size(points, 1)
     iters = Int[]
@@ -47,7 +53,7 @@ function vlozi!(G::AbstractGraph, fixed, points; ω = 1.0)
     for d in 1:dims
         b = rhsVector(G, free, view(points, d, :))
 
-        x, k = sor(-A, -b, ω)
+        x, k = domaca01.sor(-A, -b, ω)
 
         push!(iters, k)
         points[d, free] = x
@@ -56,7 +62,7 @@ function vlozi!(G::AbstractGraph, fixed, points; ω = 1.0)
     return maximum(iters)
 end
 
-function krožna_lestev(n)
+function krozna_lestev(n)
     G = SimpleGraph(2 * n)
     # prvi cikel
     for i = 1:n-1
