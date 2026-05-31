@@ -60,13 +60,13 @@ ali preko upravljalnika paketov Julia:
 
 ## Generiranje poročila
 
-Poročilo je napisano v LaTeXu in se nahaja v mapi doc/.
+Poročilo je napisano v markdown in se nahaja v doc/domaca-01_report.md.
+Že prevedena verzija se nahaja zraven doc/domaca-01_report.pdf
 
 Za ročno prevajanje:
 
-   cd doc  
-   pdflatex -shell-escape NM_dn1.tex
+pandoc domaca-01_report.md -o domaca-01_report.pdf
 
 To ustvari:
 
-   doc/NM_dn1.pdf
+   doc/domaca-01_report.pdf
