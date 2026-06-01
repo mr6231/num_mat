@@ -63,12 +63,12 @@ Perform one Dormand–Prince RK45 step of size `h`.
 
 Returns a tuple:
 - `u5`  : 5th-order (higher-accuracy) solution at t + h
-- `err` : local error estimate = ||u5 - u4||, where u4 is the embedded
+- `err` : local error estimate = u5 - u4, where u4 is the embedded
           4th-order solution. Used by the adaptive controller.
 
 Butcher table (Dormand–Prince):
   c2=1/5, c3=3/10, c4=4/5, c5=8/9, c6=1, c7=1
-  b  (5th order) : 35/384, 0, 500/1113, -125/192, 2187/6784, 11/84, 0
+  b  (5th order) : 35/384, 0, 500/1113, 125/192, -2187/6784, 11/84, 0
   b* (4th order) : 5179/57600, 0, 7571/16695, 393/640, -92097/339200,
                    187/2100, 1/40
   e  = b - b* (error coefficients):
@@ -85,20 +85,24 @@ function dopri5_step(f, u, h)
                        46732/5247 .* k3 .+ 49/176 .* k4 .-
                        5103/18656 .* k5))
 
-    u5 = u .+ h .* (35/384 .* k1 .+
-                     500/1113 .* k3 .-
-                     125/192 .* k4 .+
+    # 5th-order solution (b weights):
+    #   35/384, 0, 500/1113, +125/192, -2187/6784, 11/84, 0
+    u5 = u .+ h .* (35/384    .* k1 .+
+                     500/1113  .* k3 .+
+                     125/192   .* k4 .-
                      2187/6784 .* k5 .+
-                     11/84 .* k6)
+                     11/84     .* k6)
 
     k7 = f(u5)
 
-    err_vec = h .* (71/57600 .* k1 .-
-                    71/16695 .* k3 .+
-                    71/1920 .* k4 .-
-                    17253/339200 .* k5 .+
-                    22/525 .* k6 .-
-                    1/40 .* k7)
+    # Error estimate e = b - b* (difference between 5th and 4th order):
+    #   71/57600, 0, -71/16695, 71/1920, -17253/339200, 22/525, -1/40
+    err_vec = h .* ( 71/57600    .* k1 .-
+                     71/16695    .* k3 .+
+                     71/1920     .* k4 .-
+                     17253/339200 .* k5 .+
+                     22/525      .* k6 .-
+                     1/40        .* k7)
 
     return u5, err_vec
 end
@@ -147,7 +151,7 @@ function integrate(f, theta0, omega0;
                    rtol = 1e-11,
                    atol = 1e-11,
                    h0   = 1e-3,
-                   hmax = 0.1,
+                   hmax = 0.05,
                    hmin = 1e-14)
 
     u   = [theta0, omega0]
@@ -186,12 +190,33 @@ function integrate(f, theta0, omega0;
             push!(thetas, u[1])
 
             if u_old[1] < 0.0 && u[1] >= 0.0 && u[2] > 0.0
-                # Linear interpolation: find t where θ = 0
-                #   θ(t) ≈ θ_old + (θ_new - θ_old) * s,  s ∈ [0,1]
-                #   0     = θ_old + (θ_new - θ_old) * s
-                #   s     = -θ_old / (θ_new - θ_old)
-                s       = -u_old[1] / (u[1] - u_old[1])
-                t_cross = t_old + s * (t - t_old)
+                # Cubic Hermite interpolation to find t where θ = 0
+                # with O(h^4) accuracy, using θ and ω at both endpoints.
+                #
+                # On s ∈ [0,1], the Hermite cubic is:
+                #   H(s) = (2s³ - 3s² + 1)θ₀ + (-2s³ + 3s²)θ₁
+                #         + (s³ - 2s² + s)h·ω₀ + (s³ - s²)h·ω₁
+                # where θ₀=u_old[1], ω₀=u_old[2], θ₁=u[1], ω₁=u[2], h=t-t_old
+                dt      = t - t_old
+                θ0c     = u_old[1];  ω0c = u_old[2]
+                θ1c     = u[1];      ω1c = u[2]
+
+                # Newton iterations starting from linear estimate
+                s = -θ0c / (θ1c - θ0c)
+                for _ in 1:10
+                    s2 = s * s;  s3 = s2 * s
+                    H  = (2s3 - 3s2 + 1)*θ0c + (-2s3 + 3s2)*θ1c +
+                         (s3 - 2s2 + s)*dt*ω0c + (s3 - s2)*dt*ω1c
+                    dH = (6s2 - 6s)*θ0c + (-6s2 + 6s)*θ1c +
+                         (3s2 - 4s + 1)*dt*ω0c + (3s2 - 2s)*dt*ω1c
+                    abs(dH) < 1e-30 && break
+                    s_new = s - H / dH
+                    # clamp to [0,1] to stay in interval
+                    s_new = clamp(s_new, 0.0, 1.0)
+                    abs(s_new - s) < 1e-15 && (s = s_new; break)
+                    s = s_new
+                end
+                t_cross = t_old + s * dt
 
                 if last_crossing !== nothing
                     push!(periods, t_cross - last_crossing)
@@ -224,4 +249,3 @@ energy(theta0, omega0 = 0.0) =
     0.5 * l^2 * omega0^2 + g * l * (1.0 - cos(theta0))
 
 end # module domaca03
-
