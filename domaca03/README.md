@@ -36,15 +36,30 @@ za risanje grafov.
 
 - `energy(θ0, ω0)`
   Izračun skupne mehanske energije nihala:
-  $$E = \tfrac{1}{2}\,l^2\,\omega^2 + g\,l\,(1 - \cos\theta)$$
+
+  ```
+  E = 1/2 * l^2 * ω^2 + g * l * (1 - cos(θ))
+  ```
 
 - `f_math(u)`
   Desna stran sistema za matematično nihalo:
-  $$\dot{u} = \begin{bmatrix} \omega \\ -\tfrac{g}{l}\sin(\theta) \end{bmatrix}$$
+
+  ```
+  u = (θ, ω)
+
+  dθ/dt = ω
+  dω/dt = -(g/l) * sin(θ)
+  ```
 
 - `f_harm(u)`
   Desna stran sistema za harmonično nihalo:
-  $$\dot{u} = \begin{bmatrix} \omega \\ -\tfrac{g}{l}\,\theta \end{bmatrix}$$
+
+  ```
+  u = (θ, ω)
+
+  dθ/dt = ω
+  dω/dt = -(g/l) * θ
+  ```
 
 ---
 
@@ -54,7 +69,7 @@ za risanje grafov.
 2. Naloži skripto:
 
 ```julia
-include("pendulum.jl")
+include("domaca03.jl")
 ```
 
 3. Primer izračuna odmika ob določenem času:
